@@ -30,7 +30,7 @@ async function loadNews(page = 1) {
                     <h3 class="font-bold text-slate-900 text-lg mb-3 line-clamp-2">${item.title}</h3>
                     <p class="text-slate-600 text-sm mb-5 line-clamp-3">${item.summary || ''}</p>
                     <div class="mt-auto">
-                        <a href="/detail.html?id=${item.id}" class="inline-flex items-center text-sm font-semibold text-teal-700 hover:text-teal-600 transition-colors">
+                        <a href="/detail.html?id=${item.id}" class="inline-flex items-center text-sm font-semibold text-teal-800 hover:text-teal-600 transition-colors">
                             Xem chi tiết <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
                         </a>
                     </div>
@@ -38,12 +38,13 @@ async function loadNews(page = 1) {
             </div>
         `).join('');
 
+        // Cập nhật giao diện nút bấm phân trang đồng bộ tông màu Teal 800 mới
         if (paginationContainer && result.totalPages > 1) {
             let paginationHtml = '';
             for (let i = 1; i <= result.totalPages; i++) {
                 const isActive = i === result.currentPage;
                 paginationHtml += `
-                    <button onclick="changePage(${i})" class="px-4 py-2 text-sm font-semibold rounded-lg border transition-all ${isActive ? 'bg-teal-700 text-white border-teal-700' : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'}">
+                    <button onclick="changePage(${i})" class="px-4 py-2 text-sm font-semibold rounded-lg border transition-all ${isActive ? 'bg-teal-800 text-white border-teal-800' : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'}">
                         ${i}
                     </button>
                 `;
@@ -53,7 +54,10 @@ async function loadNews(page = 1) {
             paginationContainer.innerHTML = '';
         }
 
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        // Kích hoạt icon an toàn cho nội dung động mới tải về
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
         currentPage = page;
     } catch (error) {
         console.error("Lỗi trang chủ:", error);
@@ -61,9 +65,13 @@ async function loadNews(page = 1) {
     }
 }
 
+// Hàm chuyển trang toàn cục tối ưu cuộn màn hình mượt mà
 window.changePage = function(page) {
     loadNews(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const newsSection = document.getElementById('news-grid');
+    if (newsSection) {
+        newsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 };
 
 document.addEventListener('DOMContentLoaded', () => loadNews(1));
