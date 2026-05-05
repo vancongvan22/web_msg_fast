@@ -22,3 +22,21 @@
     </script>
 </body>
 </html>
+
+<script>
+    fetch('/api/news')
+        .then(res => res.json())
+        .then(data => {
+            console.log("Dữ liệu nhận được:", data); // Kiểm tra trong F12 Console
+            
+            // Nếu data là mảng, lấy độ dài. Nếu không, báo lỗi.
+            if (Array.isArray(data)) {
+                document.getElementById('test-data').innerText = "Đã kết nối API! Số bài viết: " + data.length;
+            } else {
+                document.getElementById('test-data').innerText = "Dữ liệu không đúng định dạng mảng!";
+            }
+        })
+        .catch(err => {
+            document.getElementById('test-data').innerText = "Lỗi kết nối API: " + err;
+        });
+</script>

@@ -3,23 +3,22 @@ const path = require('path');
 const fs = require('fs');
 const app = express();
 
-// API lấy danh sách tin tức
+// 1. Phục vụ file tĩnh (Quan trọng: Đưa lên đầu)
+app.use(express.static(path.join(process.cwd(), 'public')));
+
+// 2. API lấy tin tức
 app.get('/api/news', (req, res) => {
     try {
-        // process.cwd() giúp lấy đúng thư mục gốc dù chạy ở local hay Vercel
         const dataPath = path.join(process.cwd(), 'data.json');
         const jsonData = fs.readFileSync(dataPath, 'utf-8');
         res.json(JSON.parse(jsonData));
     } catch (error) {
-        res.status(500).json({ error: "Không thể đọc file data.json", detail: error.message });
+        res.status(500).send("Loi doc file");
     }
 });
 
-// Phục vụ các file tĩnh trong thư mục public
-app.use(express.static(path.join(process.cwd(), 'public')));
-
-// Trả về file index.html cho mọi đường dẫn không phải API (hỗ trợ Single Page App)
-app.get('*', (req, res) => {
+// 3. Trang chủ (Chỉ dùng đường dẫn chính xác '/')
+app.get('/', (req, res) => {
     res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
