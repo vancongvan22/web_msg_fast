@@ -46,25 +46,3 @@
         </a>
     </div>
 </header>
-
-<script>
-    // Hàm xử lý đóng mở menu mượt mà trên thiết bị di động
-    function toggleMobileMenu() {
-        const menu = document.getElementById('mobile-menu');
-        const icon = document.getElementById('menu-icon');
-        
-        if (menu && menu.classList.contains('hidden')) {
-            menu.classList.remove('hidden');
-            if (typeof lucide !== 'undefined') {
-                icon.setAttribute('data-lucide', 'x'); // Đổi icon Menu thành dấu X đóng
-                lucide.createIcons();
-            }
-        } else if (menu) {
-            menu.classList.add('hidden');
-            if (typeof lucide !== 'undefined') {
-                icon.setAttribute('data-lucide', 'menu'); // Đổi lại thành icon Menu 3 gạch
-                lucide.createIcons();
-            }
-        }
-    }
-</script>

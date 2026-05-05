@@ -6,7 +6,6 @@
 async function loadComponents() {
     const elements = document.querySelectorAll('[data-component]');
     
-    // Tạo danh sách các tác vụ nạp component song song để tối ưu tốc độ
     const promises = Array.from(elements).map(async (el) => {
         const componentName = el.getAttribute('data-component');
         try {
@@ -24,11 +23,36 @@ async function loadComponents() {
     // Chờ tất cả component nạp xong xuôi
     await Promise.all(promises);
 
-    // Sau khi nạp xong HTML động, kích hoạt thư viện Icon Lucide trên toàn trang
+    // Kích hoạt thư viện Icon Lucide trên toàn trang sau khi giao diện sẵn sàng
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
 }
 
-// Đăng ký chạy loader ngay khi cấu trúc DOM cơ bản sẵn sàng
+/**
+ * Khai báo hàm xử lý đóng mở menu điện thoại ở phạm vi toàn cục (window)
+ * Giúp giải quyết triệt để lỗi "toggleMobileMenu is not defined"
+ */
+window.toggleMobileMenu = function() {
+    const menu = document.getElementById('mobile-menu');
+    const icon = document.getElementById('menu-icon');
+    
+    if (!menu || !icon) return;
+
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') {
+            icon.setAttribute('data-lucide', 'x'); // Chuyển đổi thành icon dấu X đóng menu
+            lucide.createIcons();
+        }
+    } else {
+        menu.classList.add('hidden');
+        if (typeof lucide !== 'undefined') {
+            icon.setAttribute('data-lucide', 'menu'); // Trả lại icon 3 gạch mở menu
+            lucide.createIcons();
+        }
+    }
+};
+
+// Đăng ký kích hoạt tiến trình tải cấu phần
 document.addEventListener('DOMContentLoaded', loadComponents);
