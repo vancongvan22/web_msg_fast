@@ -3,38 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi Tiết Tin Tức | WEB_MSG</title>
+    <title>Chi Tiết Bài Viết | WEB_MSG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="/js/component-loader.js" defer></script>
 </head>
-<body class="bg-slate-50 text-slate-800 pb-24">
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
 
     <div data-component="header"></div>
 
-    <div class="max-w-3xl mx-auto relative">
-        <a href="/" class="absolute top-4 left-4 z-20 bg-white/90 hover:bg-white text-teal-800 p-2 rounded-full shadow-md transition-all flex items-center justify-center w-10 h-10">
-            <i data-lucide="arrow-left" class="w-5 h-5"></i>
-        </a>
-    </div>
-
-    <main id="main-content" class="max-w-3xl mx-auto bg-white min-h-screen shadow-md pb-10">
-        <div class="flex flex-col items-center justify-center py-40 text-slate-400">
-            <div class="animate-spin rounded-full h-8 w-8 border-2 border-teal-700 border-t-transparent mb-4"></div>
-            <p class="text-sm font-medium">Đang tải nội dung...</p>
+    <main id="main-content" class="flex-grow container mx-auto px-4 max-w-4xl py-12 bg-white rounded-2xl shadow-sm border my-6">
+        <div class="text-center py-20 text-slate-400">
+            <p class="animate-pulse">Đang tải nội dung bài viết từ hệ thống...</p>
         </div>
     </main>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
-        <div class="max-w-3xl mx-auto grid grid-cols-2 gap-4">
-            <a href="https://zalo.me/your_phone" target="_blank" class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-sm">
-                <i data-lucide="message-square" class="w-5 h-5"></i> Zalo
-            </a>
-            <a href="tel:0123456789" class="flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-600 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-sm">
-                <i data-lucide="phone" class="w-5 h-5"></i> Gọi điện
-            </a>
-        </div>
-    </div>
+    <div data-component="footer"></div>
 
     <script src="/js/detail.js" defer></script>
 </body>

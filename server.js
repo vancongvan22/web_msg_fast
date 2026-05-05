@@ -111,7 +111,26 @@ app.post('/api/news', async (req, res) => {
         res.status(500).json({ error: "Lỗi hệ thống, không thể lưu bài viết vào Database lúc này." });
     }
 });
+// 3. API LẤY CHI TIẾT MỘT BÀI VIẾT (GET - Dùng khi người dùng bấm nút Xem Chi Tiết)
+app.get('/api/news/:id', async (req, res) => {
+    try {
+        const newsId = req.params.id;
 
+        // Tìm bài viết trong Database thật bằng mã _id của MongoDB
+        const article = await News.findById(newsId);
+
+        // Nếu không tìm thấy bài viết nào ứng với ID đó
+        if (!article) {
+            return res.status(404).json({ error: "Không tìm thấy bài viết yêu cầu!" });
+        }
+
+        // Nếu tìm thấy, trả về toàn bộ nội dung bài viết cho Frontend hiển thị
+        res.json(article);
+    } catch (error) {
+        console.error("❌ LỖI API LẤY CHI TIẾT BÀI VIẾT:", error);
+        res.status(500).json({ error: "Mã định danh bài viết không hợp lệ hoặc lỗi hệ thống." });
+    }
+});
 
 // Cấu hình dự phòng (Fallback): Mọi đường dẫn không khớp API sẽ tự trả về index.html
 app.get('*', (req, res) => {

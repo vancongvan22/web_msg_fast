@@ -31,7 +31,7 @@ async function loadNews(page = 1) {
                     <h3 class="font-bold text-slate-900 text-lg mb-3 line-clamp-2">${item.title}</h3>
                     <p class="text-slate-600 text-sm mb-5 line-clamp-3">${item.summary || ''}</p>
                     <div class="mt-auto pt-3 border-t">
-                        <a href="/detail.html?id=${item.id}" class="inline-flex items-center text-sm font-semibold text-teal-800 hover:text-teal-600 transition-colors">
+                        <a href="/detail.html?id=${item._id}" class="inline-flex items-center text-sm font-semibold text-teal-800 hover:text-teal-600 transition-colors">
                             Xem chi tiết <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
                         </a>
                     </div>

@@ -11,34 +11,38 @@ async function initTrangChiTiet() {
     }
 
     try {
-        const response = await fetch('/api/news?limit=999');
-        if (!response.ok) throw new Error('Không thể kết nối đến máy chủ API');
+        const response = await fetch(`/api/news/${id}`);
         
-        const result = await response.json();
-        const newsArray = Array.isArray(result) ? result : (result.data || []);
-        
-        const item = newsArray.find(article => article.id == id);
-
-        if (item) {
-            container.innerHTML = `
-                <div class="relative w-full h-[45vh] overflow-hidden">
-                    <img src="${item.image}" class="w-full h-full object-cover" alt="${item.title}">
-                </div>
-                <div class="p-6 md:p-8 -mt-8 bg-white rounded-t-[32px] relative z-10 shadow-sm">
-                    <div class="flex items-center gap-2 text-slate-400 text-xs mb-4">
-                        <i data-lucide="clock" class="w-4 h-4"></i> ${item.date}
-                    </div>
-                    <h1 class="text-2xl md:text-3xl font-black text-slate-900 mb-6 leading-tight">${item.title}</h1>
-                    <div class="prose max-w-none text-slate-600 leading-relaxed space-y-4">
-                        ${formatContent(item.content || item.summary)}
-                    </div>
-                </div>
-            `;
-        } else {
-            container.innerHTML = '<div class="text-center py-40 text-slate-500 font-medium">Không tìm thấy bài viết này trong hệ thống!</div>';
+        if (!response.ok) {
+            container.innerHTML = '<div class="text-center py-40 text-slate-500 font-medium">Không tìm thấy bài viết này trong hệ thống hoặc đường link đã hết hạn!</div>';
+            return;
         }
         
-        // Kích hoạt lại icon riêng cho phần nội dung động vừa thêm vào
+        const item = await response.json();
+
+        // Đổ dữ liệu thật vào cấu hình giao diện
+        container.innerHTML = `
+            <div class="relative w-full h-[45vh] overflow-hidden rounded-xl mb-6 shadow-inner">
+                <img src="${item.image}" class="w-full h-full object-cover" alt="${item.title}">
+            </div>
+            <div class="p-2 relative z-10">
+                <div class="flex items-center gap-2 text-slate-400 text-xs mb-4">
+                    <i data-lucide="clock" class="w-4 h-4"></i> Đăng ngày: ${item.date}
+                </div>
+                <h1 class="text-2xl md:text-3xl font-black text-slate-900 mb-6 leading-tight">${item.title}</h1>
+                
+                <p class="text-slate-500 font-medium italic border-l-4 border-teal-800 pl-3 py-1 bg-slate-50 rounded-r-lg mb-6 text-sm md:text-base">
+                    ${item.summary || ''}
+                </p>
+
+                <div class="prose max-w-none text-slate-600 leading-relaxed space-y-4 text-base md:text-lg">
+                    ${formatContent(item.content)}
+                </div>
+            </div>
+        `;
+        
+        document.title = item.title + " | WEB_MSG";
+        
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
         }
@@ -50,7 +54,7 @@ async function initTrangChiTiet() {
 
 function formatContent(text) {
     if (!text) return '';
-    return text.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('');
+    return text.split('\n').map(p => p.trim() ? `<p class="mb-4">${p}</p>` : '').join('');
 }
 
 document.addEventListener('DOMContentLoaded', initTrangChiTiet);
