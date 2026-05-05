@@ -1,42 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>WEB_MSG Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEB_MSG | Tin Tức Massage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body style="background: #f0f0f0; padding: 50px; text-align: center;">
-    <h1 style="color: teal;">XIN CHÀO! GIAO DIỆN WEB_MSG ĐÃ CHẠY</h1>
-    <p>Nếu bạn thấy dòng này, nghĩa là kết nối đã thành công.</p>
-    <div id="test-data" style="margin-top: 20px; font-weight: bold;">Đang kiểm tra dữ liệu...</div>
+<body class="bg-slate-50">
+    <nav class="bg-teal-700 text-white p-4 shadow-lg">
+        <div class="container mx-auto font-bold text-xl uppercase tracking-widest">WEB_MSG</div>
+    </nav>
+
+    <header class="py-10 text-center">
+        <h1 class="text-3xl font-extrabold text-slate-800">TIN TỨC & ƯU ĐÃI</h1>
+        <p class="text-slate-500 mt-2">Cập nhật những dịch vụ mới nhất từ chúng tôi</p>
+    </header>
+
+    <main class="container mx-auto px-4 pb-20">
+        <!-- Nơi các bài viết sẽ hiện ra -->
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <p class="text-center col-span-full">Đang tải tin tức...</p>
+        </div>
+    </main>
 
     <script>
-        // Kiểm tra xem API có lấy được data không
         fetch('/api/news')
             .then(res => res.json())
             .then(data => {
-                document.getElementById('test-data').innerText = "Đã kết nối API! Số bài viết: " + data.length;
+                const grid = document.getElementById('news-grid');
+                // Duyệt qua từng bài viết trong mảng data và tạo HTML
+                grid.innerHTML = data.map(item => `
+                    <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100">
+                        <img src="${item.image}" class="w-full h-52 object-cover">
+                        <div class="p-6">
+                            <h2 class="font-bold text-xl mb-3 text-slate-800">${item.title}</h2>
+                            <p class="text-slate-600 text-sm mb-4 line-clamp-3">${item.summary}</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-400">${item.date}</span>
+                                <button class="text-teal-600 font-bold text-sm hover:underline">Chi tiết →</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
             })
             .catch(err => {
-                document.getElementById('test-data').innerText = "Lỗi kết nối API: " + err;
+                document.getElementById('news-grid').innerHTML = "Lỗi tải dữ liệu!";
             });
     </script>
 </body>
 </html>
-
-<script>
-    fetch('/api/news')
-        .then(res => res.json())
-        .then(data => {
-            console.log("Dữ liệu nhận được:", data); // Kiểm tra trong F12 Console
-            
-            // Nếu data là mảng, lấy độ dài. Nếu không, báo lỗi.
-            if (Array.isArray(data)) {
-                document.getElementById('test-data').innerText = "Đã kết nối API! Số bài viết: " + data.length;
-            } else {
-                document.getElementById('test-data').innerText = "Dữ liệu không đúng định dạng mảng!";
-            }
-        })
-        .catch(err => {
-            document.getElementById('test-data').innerText = "Lỗi kết nối API: " + err;
-        });
-</script>
