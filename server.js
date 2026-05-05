@@ -2,6 +2,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose'); // [MỚI] 1. Nạp thư viện Mongoose để làm việc với Database
 
 // Tự động cấu hình đọc file .env nếu có (giúp linh hoạt chọn PORT khi deploy)
 require('dotenv').config({ silent: true });
@@ -16,60 +17,69 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ==========================================
-// MOCK DATA - Dữ liệu giả lập danh sách tin tức
+// [MỚI] CONFIG & CONNECT DATABASE (MONGODB)
 // ==========================================
-const mockNews = [
-    {
-        id: 1,
-        title: "Liệu pháp massage ấn huyệt đẩy lùi đau vai gáy hiệu quả",
-        summary: "Đau vai gáy là căn bệnh phổ biến của dân văn phòng. Tìm hiểu phương pháp ấn huyệt y học cổ truyền giúp dứt điểm cơn đau nhanh chóng.",
-        content: "Đau vai gáy không chỉ gây mệt mỏi mà còn ảnh hưởng lớn đến năng suất làm việc. Tại WEB_MSG, liệu pháp ấn huyệt chuyên sâu kết hợp thảo dược độc quyền giúp đả thông kinh lạc, tăng cường tuần hoàn máu vùng cổ. Khách hàng sẽ cảm nhận rõ sự nhẹ nhõm ngay từ buổi trị liệu đầu tiên.",
-        image: "https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=600",
-        date: "05/05/2026"
-    },
-    {
-        id: 2,
-        title: "Ưu đãi tri ân: Giảm ngay 30% cho gói trị liệu đá nóng",
-        summary: "Chào hè rực rỡ, WEB_MSG mang đến chương trình khuyến mãi lớn nhất năm dành cho dịch vụ massage đá nóng phục hồi năng lượng.",
-        content: "Nhằm tri ân khách hàng thân thiết, từ ngày mai hệ thống áp dụng ưu đãi giảm 30% cho toàn bộ liệu trình đá nóng Volcano phục hồi sâu. Sức nóng từ đá nham thạch tự nhiên kết hợp tinh dầu oải hương sẽ giúp bạn đánh bay căng thẳng, ngủ ngon sâu giấc.",
-        image: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600",
-        date: "04/05/2026"
-    },
-    {
-        id: 3,
-        title: "Tác dụng bất ngờ của massage thảo dược đối với giấc ngủ",
-        summary: "Bạn thường xuyên bị mất ngủ, ngủ không sâu giấc? Hãy khám phá sức mạnh chữa lành của các túi thảo dược thiên nhiên hấp nóng.",
-        content: "Mất ngủ kéo dài là tác nhân tàn phá nhan sắc và sức khỏe. Massage túi thảo dược tại spa sử dụng các loại cây thuốc nam quý như ngải cứu, gừng gió, đinh lăng được hấp chín bằng hơi nước, giúp kích thích các huyệt vị, mang lại trạng thái thư giãn tuyệt đối cho hệ thần kinh.",
-        image: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?q=80&w=600",
-        date: "01/05/2026"
-    }
-];
+// Lấy chuỗi kết nối từ file .env bảo mật, nếu chạy dưới local chưa có sẽ tự động dùng db tên là 'web_msg_spa'
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/web_msg_spa';
+
+mongoose.connect(MONGODB_URI)
+    .then(() => console.log('🍃 KẾT NỐI DATABASE MONGODB THÀNH CÔNG!'))
+    .catch(err => console.error('❌ LỖI KẾT NỐI DATABASE MONGODB:', err));
+
+// ==========================================
+// [MỚI] DEFINE SCHEMAS & MODELS (Khuôn mẫu dữ liệu)
+// ==========================================
+const NewsSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    summary: { type: String, required: true },
+    content: { type: String, required: true },
+    image: { type: String, default: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=600' },
+    date: { type: String, default: () => new Date().toLocaleDateString('vi-VN') }
+});
+
+// Tạo Model 'News' đại diện cho bảng chứa danh sách tin tức trong Database
+const News = mongoose.model('News', NewsSchema);
+
 
 // ==========================================
 // API ENDPOINTS - Hệ thống API cung cấp dữ liệu
 // ==========================================
 
-// API lấy danh sách bài viết (Có hỗ trợ phân trang)
-app.get('/api/news', (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 6;
-    
-    // Nếu yêu cầu lấy toàn bộ dữ liệu (như trang chi tiết cần tìm kiếm)
-    if (limit === 999) {
-        return res.json({ data: mockNews });
+// [SỬA ĐỔI] API lấy danh sách bài viết (Chuyển sang lấy từ MongoDB bằng async/await)
+app.get('/api/news', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 6;
+        
+        // Nếu yêu cầu lấy toàn bộ dữ liệu (limit = 999) để tìm kiếm hoặc hiển thị hết
+        if (limit === 999) {
+            const allNews = await News.find({}).sort({ _id: -1 }); // Lấy hết bài viết, bài mới nhất xếp lên đầu
+            return res.json({ data: allNews });
+        }
+
+        const startIndex = (page - 1) * limit;
+        
+        // 1. Lấy tổng số lượng bài viết đang có trong Database thật
+        const totalItems = await News.countDocuments();
+
+        // 2. Truy vấn dữ liệu có phân trang, bỏ qua (skip) các bài cũ và giới hạn (limit) số bài lấy ra
+        const dbNews = await News.find({})
+            .sort({ _id: -1 }) // Sắp xếp bài mới đăng lên đầu tiên
+            .skip(startIndex)
+            .limit(limit);
+
+        const results = {
+            totalItems: totalItems,
+            totalPages: Math.ceil(totalItems / limit),
+            currentPage: page,
+            data: dbNews
+        };
+
+        res.json(results);
+    } catch (error) {
+        console.error("❌ LỖI API LẤY TIN TỨC:", error);
+        res.status(500).json({ error: "Lỗi hệ thống không thể lấy dữ liệu từ Database." });
     }
-
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-
-    const results = {
-        totalItems: mockNews.length,
-        totalPages: Math.ceil(mockNews.length / limit),
-        currentPage: page,
-        data: mockNews.slice(startIndex, endIndex)
-    };
-
-    res.json(results);
 });
 
 // Cấu hình dự phòng (Fallback): Mọi đường dẫn không khớp API sẽ tự trả về index.html
