@@ -3,57 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết bài viết</title>
+    <title>Chi tiết bài viết | WEB_MSG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-slate-50 text-slate-800">
+
     <!-- Nút quay lại -->
     <div class="fixed top-4 left-4 z-50">
-        <a href="/" class="bg-white/80 backdrop-blur-md shadow-md p-3 rounded-full flex items-center justify-center">
+        <a href="/" class="bg-white/90 backdrop-blur shadow-md p-3 rounded-full flex items-center justify-center hover:bg-teal-50 transition-colors">
             <i data-lucide="arrow-left" class="text-teal-700"></i>
         </a>
     </div>
 
-    <div id="main-content" class="max-w-2xl mx-auto pb-24">
-        <!-- Nội dung sẽ đổ vào đây -->
-        <p class="text-center py-20">Đang tìm bài viết...</p>
-    </div>
+    <main id="main-content" class="max-w-2xl mx-auto pb-32">
+        <div class="text-center py-20 text-slate-400 animate-pulse">
+            <p>Đang tải nội dung chi tiết...</p>
+        </div>
+    </main>
 
-    <!-- Thanh liên hệ dưới cùng (Sticky Bottom) -->
-    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t flex gap-4">
-        <a href="https://zalo.me/your_phone" class="flex-1 bg-blue-500 text-white text-center py-3 rounded-xl font-bold flex justify-center items-center gap-2">
-            <i data-lucide="message-circle" class="w-5 h-5"></i> Nhắn Zalo
+    <!-- Thanh liên hệ dưới cùng -->
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t flex gap-4 z-50">
+        <a href="https://zalo.me/0901234567" class="flex-1 bg-blue-500 text-white text-center py-3 rounded-xl font-bold flex justify-center items-center gap-2 shadow-lg shadow-blue-100">
+            <i data-lucide="message-circle" class="w-5 h-5"></i> Zalo
         </a>
-        <a href="tel:0901234567" class="flex-1 bg-teal-600 text-white text-center py-3 rounded-xl font-bold flex justify-center items-center gap-2">
+        <a href="tel:0901234567" class="flex-1 bg-teal-600 text-white text-center py-3 rounded-xl font-bold flex justify-center items-center gap-2 shadow-lg shadow-teal-100">
             <i data-lucide="phone" class="w-5 h-5"></i> Gọi điện
         </a>
     </div>
 
     <script>
+        // 1. Lấy ID từ thanh địa chỉ (?id=2)
         const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
+        const newsId = params.get('id');
 
-        fetch('/api/news')
-            .then(res => res.json())
-            .then(data => {
-                const item = data.find(n => n.id == id);
+        async function loadDetail() {
+            const container = document.getElementById('main-content');
+            
+            try {
+                // 2. Gọi API (Lưu ý: lấy hết để tìm ID, không phân trang ở đây)
+                const response = await fetch('/api/news?limit=999'); 
+                const result = await response.json();
+                
+                // 3. Tìm bài viết có ID khớp trong result.data
+                const item = result.data.find(n => n.id == newsId);
+
                 if (item) {
-                    document.getElementById('main-content').innerHTML = `
-                        <img src="${item.image}" class="w-full h-[40vh] object-cover shadow-inner">
-                        <div class="p-6">
-                            <h1 class="text-3xl font-black text-slate-900 leading-tight">${item.title}</h1>
-                            <div class="flex items-center gap-2 text-slate-400 text-sm my-4">
+                    container.innerHTML = `
+                        <img src="${item.image}" class="w-full h-[45vh] object-cover shadow-inner">
+                        <div class="p-6 md:p-8 -mt-6 bg-white rounded-t-[32px] relative z-10 shadow-sm">
+                            <div class="flex items-center gap-2 text-slate-400 text-xs mb-4">
                                 <i data-lucide="clock" class="w-4 h-4"></i> ${item.date}
                             </div>
-                            <div class="prose prose-teal text-lg leading-relaxed text-slate-700">
-                                ${item.content}
+                            <h1 class="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-6">${item.title}</h1>
+                            <div class="prose prose-slate text-lg leading-relaxed text-slate-600">
+                                ${item.content || item.summary}
                             </div>
                         </div>
                     `;
-                    lucide.createIcons();
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-20">
+                            <i data-lucide="search-x" class="mx-auto w-12 h-12 text-slate-300 mb-4"></i>
+                            <p class="text-slate-500 font-bold">Không tìm thấy bài viết này!</p>
+                            <a href="/" class="text-teal-600 underline mt-4 inline-block">Quay lại trang chủ</a>
+                        </div>
+                    `;
                 }
-            });
+                lucide.createIcons();
+            } catch (error) {
+                container.innerHTML = '<p class="text-center py-20 text-red-500">Lỗi kết nối máy chủ.</p>';
+            }
+        }
+
+        if (newsId) {
+            loadDetail();
+        } else {
+            window.location.href = '/';
+        }
     </script>
 </body>
 </html>
