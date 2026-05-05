@@ -1,8 +1,70 @@
-<header class="bg-teal-800 text-white p-4 sticky top-0 z-50 shadow-sm">
-    <div class="container mx-auto flex justify-between items-center max-w-6xl px-2">
-        <h1 class="text-xl font-black tracking-wider"><a href="/">WEB_MSG</a></h1>
-        <a href="tel:0123456789" class="bg-teal-700 hover:bg-teal-600 text-white text-xs font-bold py-2 px-4 rounded-full transition-colors">
-            Gọi đặt lịch
+<header class="bg-teal-800 text-white sticky top-0 z-50 shadow-md">
+    <div class="container mx-auto max-w-6xl px-4 py-3 flex justify-between items-center">
+        
+        <h1 class="text-xl font-black tracking-wider">
+            <a href="/" class="hover:text-teal-200 transition-colors">WEB_MSG</a>
+        </h1>
+
+        <nav class="hidden md:flex items-center gap-8 font-medium text-sm text-teal-100">
+            <a href="/" class="hover:text-white transition-colors flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-white">
+                <i data-lucide="home" class="w-4 h-4"></i> Trang chủ
+            </a>
+            <a href="#" class="hover:text-white transition-colors flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-white">
+                <i data-lucide="sparkles" class="w-4 h-4"></i> Dịch vụ
+            </a>
+            <a href="#" class="hover:text-white transition-colors flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-white">
+                <i data-lucide="badge-percent" class="w-4 h-4"></i> Khuyến mãi
+            </a>
+            <a href="#" class="hover:text-white transition-colors flex items-center gap-1.5 py-1 border-b-2 border-transparent hover:border-white">
+                <i data-lucide="info" class="w-4 h-4"></i> Giới thiệu
+            </a>
+        </nav>
+
+        <div class="flex items-center gap-3">
+            <a href="tel:0123456789" class="bg-teal-700 hover:bg-teal-600 text-white text-xs font-bold py-2 px-4 rounded-full transition-colors shadow-sm hidden sm:inline-block">
+                Gọi đặt lịch
+            </a>
+            
+            <button onclick="toggleMobileMenu()" class="md:hidden p-1 hover:bg-teal-700 rounded-lg transition-colors" aria-label="Toggle Menu">
+                <i data-lucide="menu" id="menu-icon" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-teal-850 border-t border-teal-700/50 px-4 py-3 space-y-3 font-medium text-sm text-teal-100 shadow-inner">
+        <a href="/" class="flex items-center gap-2 py-2 border-b border-teal-700/30 hover:text-white">
+            <i data-lucide="home" class="w-4 h-4"></i> Trang chủ
+        </a>
+        <a href="#" class="flex items-center gap-2 py-2 border-b border-teal-700/30 hover:text-white">
+            <i data-lucide="sparkles" class="w-4 h-4"></i> Dịch vụ
+        </a>
+        <a href="#" class="flex items-center gap-2 py-2 border-b border-teal-700/30 hover:text-white">
+            <i data-lucide="badge-percent" class="w-4 h-4"></i> Khuyến mãi
+        </a>
+        <a href="#" class="flex items-center gap-2 py-2 hover:text-white">
+            <i data-lucide="info" class="w-4 h-4"></i> Giới thiệu
         </a>
     </div>
 </header>
+
+<script>
+    // Hàm xử lý đóng mở menu mượt mà trên thiết bị di động
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const icon = document.getElementById('menu-icon');
+        
+        if (menu && menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') {
+                icon.setAttribute('data-lucide', 'x'); // Đổi icon Menu thành dấu X đóng
+                lucide.createIcons();
+            }
+        } else if (menu) {
+            menu.classList.add('hidden');
+            if (typeof lucide !== 'undefined') {
+                icon.setAttribute('data-lucide', 'menu'); // Đổi lại thành icon Menu 3 gạch
+                lucide.createIcons();
+            }
+        }
+    }
+</script>
