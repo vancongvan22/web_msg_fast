@@ -20,6 +20,7 @@ async function loadNews(page = 1) {
             return;
         }
 
+        // Render danh sách bài viết
         grid.innerHTML = newsList.map(item => `
             <div class="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-md transition-all flex flex-col h-full">
                 <img src="${item.image}" class="w-full h-48 object-cover" alt="${item.title}">
@@ -29,7 +30,7 @@ async function loadNews(page = 1) {
                     </span>
                     <h3 class="font-bold text-slate-900 text-lg mb-3 line-clamp-2">${item.title}</h3>
                     <p class="text-slate-600 text-sm mb-5 line-clamp-3">${item.summary || ''}</p>
-                    <div class="mt-auto">
+                    <div class="mt-auto pt-3 border-t">
                         <a href="/detail.html?id=${item.id}" class="inline-flex items-center text-sm font-semibold text-teal-800 hover:text-teal-600 transition-colors">
                             Xem chi tiết <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
                         </a>
@@ -38,11 +39,12 @@ async function loadNews(page = 1) {
             </div>
         `).join('');
 
-        // Cập nhật giao diện nút bấm phân trang đồng bộ tông màu Teal 800 mới
+        // Render các nút phân trang
         if (paginationContainer && result.totalPages > 1) {
             let paginationHtml = '';
             for (let i = 1; i <= result.totalPages; i++) {
                 const isActive = i === result.currentPage;
+                // Cập nhật màu nút Active sang bg-teal-800 để đồng bộ với giao diện mới
                 paginationHtml += `
                     <button onclick="changePage(${i})" class="px-4 py-2 text-sm font-semibold rounded-lg border transition-all ${isActive ? 'bg-teal-800 text-white border-teal-800' : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'}">
                         ${i}
@@ -54,7 +56,7 @@ async function loadNews(page = 1) {
             paginationContainer.innerHTML = '';
         }
 
-        // Kích hoạt icon an toàn cho nội dung động mới tải về
+        // Kích hoạt Icon Lucide cho các thẻ bài viết vừa được render động
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
         }
@@ -65,13 +67,17 @@ async function loadNews(page = 1) {
     }
 }
 
-// Hàm chuyển trang toàn cục tối ưu cuộn màn hình mượt mà
+// Hàm chuyển trang toàn cục
 window.changePage = function(page) {
     loadNews(page);
-    const newsSection = document.getElementById('news-grid');
-    if (newsSection) {
-        newsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Cuộn mượt xuống phân khu tin tức thay vì cuộn lên đầu banner
+    const newsGrid = document.getElementById('news-grid');
+    if (newsGrid) {
+        newsGrid.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => loadNews(1));
+// Chạy khi DOM sẵn sàng
+document.addEventListener('DOMContentLoaded', () => {
+    loadNews(1);
+});
