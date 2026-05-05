@@ -1,37 +1,35 @@
+// api/index.js
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
-const app = express();
+const { getNewsData } = require(path.join(process.cwd(), 'lib', 'data-helpers'));
 
-app.use(express.static(path.join(process.cwd(), 'public')));
+const app = express();
+app.use(express.json());
 
 app.get('/api/news', (req, res) => {
     try {
-        const dataPath = path.join(process.cwd(), 'data.json');
-        const allNews = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+        const allNews = getNewsData();
+        
+        if (!Array.isArray(allNews)) {
+            return res.json({ total: 0, totalPages: 0, currentPage: 1, data: [] });
+        }
 
-        // Lấy tham số từ URL (mặc định trang 1, mỗi trang 6 bài)
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 6;
 
         const startIndex = (page - 1) * limit;
         const endIndex = page * limit;
 
-        const results = {
+        res.json({
             total: allNews.length,
             totalPages: Math.ceil(allNews.length / limit),
             currentPage: page,
-            data: allNews.slice(startIndex, endIndex) // Cắt mảng dữ liệu theo trang
-        };
-
-        res.json(results);
+            data: allNews.slice(startIndex, endIndex)
+        });
     } catch (error) {
-        res.status(500).json({ error: "Lỗi đọc dữ liệu" });
+        console.error("Lỗi hệ thống Backend:", error.message);
+        res.status(500).json({ error: "Lỗi xử lý nội bộ tại server" });
     }
-});
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
 module.exports = app;

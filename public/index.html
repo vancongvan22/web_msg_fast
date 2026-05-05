@@ -3,118 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WEB_MSG | Tin Tức & Ưu Đãi Massage</title>
+    <title>Trang Chủ Tin Tức | WEB_MSG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-slate-50 text-slate-800">
 
-    <nav class="bg-teal-700 text-white p-4 shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto font-bold text-xl uppercase tracking-widest flex justify-between items-center">
-            <span>WEB_MSG</span>
-            <a href="tel:0901234567" class="bg-teal-600 px-4 py-2 rounded-full text-sm font-normal normal-case hover:bg-teal-500 transition-all">
-                Gọi đặt lịch
-            </a>
+    <header class="bg-white border-b p-4 sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto">
+            <h1 class="text-xl font-black text-teal-700">WEB_MSG FAST</h1>
         </div>
-    </nav>
-
-    <header class="py-12 text-center bg-white border-b mb-10">
-        <h1 class="text-3xl md:text-4xl font-black text-slate-800 tracking-tight uppercase">Tin tức & Ưu đãi</h1>
-        <p class="text-slate-400 mt-2 text-sm md:text-base">Các liệu trình trị liệu và khuyến mãi độc quyền</p>
     </header>
 
-    <main class="container mx-auto px-4 pb-20">
-        
-        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            </div>
-
-        <div id="pagination-controls" class="flex justify-center items-center mt-12 gap-2">
-            </div>
-
+    <main class="container mx-auto px-4 py-8 max-w-6xl">
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div id="pagination" class="flex justify-center items-center gap-2 mt-12"></div>
     </main>
 
-    <script>
-        let currentPage = 1;
-        const itemsPerPage = 6; // Bạn có thể chỉnh số bài hiển thị mỗi trang tại đây
-
-        // Hàm gọi API lấy dữ liệu theo từng trang cụ thể
-        async function loadNewsPage(page = 1) {
-            const grid = document.getElementById('news-grid');
-            const paginationContainer = document.getElementById('pagination-controls');
-            
-            // Hiển thị trạng thái đang tải dữ liệu
-            grid.innerHTML = '<p class="text-center col-span-full py-10 text-slate-400 animate-pulse">Đang tải danh sách bài viết...</p>';
-
-            try {
-                // Gọi API kèm theo tham số page và limit kì vọng
-                const response = await fetch(`/api/news?page=${page}&limit=${itemsPerPage}`);
-                const result = await response.json();
-                
-                // Trích xuất dữ liệu từ Object phân trang Backend trả về
-                const articles = result.data;
-                const totalPages = result.totalPages;
-                const activePage = result.currentPage;
-
-                // KIỂM TRA: Nếu có dữ liệu bài viết hợp lệ
-                if (articles && articles.length > 0) {
-                    // 1. Render giao diện các Card bài viết
-                    grid.innerHTML = articles.map(item => `
-                        <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden border border-slate-100 flex flex-col">
-                            <div class="relative overflow-hidden">
-                                <img src="${item.image}" class="w-full h-52 object-cover transform group-hover:scale-105 transition duration-500">
-                            </div>
-                            <div class="p-6 flex-1 flex flex-col">
-                                <div class="flex items-center text-slate-400 text-xs mb-3">
-                                    <i data-lucide="calendar" class="w-3. h-3 mr-1"></i> ${item.date}
-                                </div>
-                                <h2 class="font-bold text-lg mb-2 text-slate-800 group-hover:text-teal-700 transition-colors">${item.title}</h2>
-                                <p class="text-slate-500 text-sm mb-6 line-clamp-3 leading-relaxed">${item.summary}</p>
-                                <div class="mt-auto">
-                                    <a href="detail.html?id=${item.id}" class="inline-flex items-center justify-center w-full bg-slate-50 hover:bg-teal-600 hover:text-white text-slate-700 font-bold py-2.5 px-4 rounded-xl transition-all duration-300 border border-slate-100 group-hover:border-transparent">
-                                        Xem chi tiết <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-
-                    // 2. Render hệ thống nút bấm phân trang
-                    let paginationHtml = '';
-                    for (let i = 1; i <= totalPages; i++) {
-                        paginationHtml += `
-                            <button onclick="goToPage(${i})" 
-                                class="w-10 h-10 rounded-xl font-bold border transition-all ${i === activePage ? 'bg-teal-600 text-white border-teal-600 shadow-md shadow-teal-100' : 'bg-white text-slate-600 hover:border-teal-500 hover:text-teal-600'}">
-                                ${i}
-                            </button>
-                        `;
-                    }
-                    paginationContainer.innerHTML = paginationHtml;
-
-                } else {
-                    grid.innerHTML = '<p class="text-center col-span-full py-10 text-slate-400">Hiện tại chưa có bài viết nào.</p>';
-                    paginationContainer.innerHTML = '';
-                }
-
-                // Vẽ lại các Icon Lucide mới sinh ra
-                lucide.createIcons();
-                
-                // Tự động cuộn trang lên đầu mượt mà khi người dùng bấm qua trang mới
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            } catch (error) {
-                console.error("Lỗi Frontend:", error);
-                grid.innerHTML = '<p class="text-center col-span-full py-10 text-red-500 font-semibold">Không thể kết nối đến máy chủ API.</p>';
-            }
-        }
-
-        // Hàm kích hoạt khi người dùng bấm nút số trang
-        function goToPage(pageNumber) {
-            currentPage = pageNumber;
-            loadNewsPage(pageNumber);
-        }
-
-        // Khởi chạy ứng dụng lấy trang số 1 ngay khi load web
-        loadNewsPage(currentPage);
-    </script>
+    <script src="/js/main.js" defer></script>
 </body>
 </html>

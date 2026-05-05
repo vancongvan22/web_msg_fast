@@ -1,34 +1,19 @@
+
 [
   {
     "id": 1,
     "title": "Liệu pháp Ấn huyệt Trị liệu Vai Gáy",
     "date": "05/05/2026",
-    "summary": "Giải pháp dứt điểm đau mỏi cho dân văn phòng chỉ sau một liệu trình.",
-    "content": "Tại WEB_MSG, chúng tôi hiểu rằng đau mỏi vai gáy là nỗi lo của rất nhiều người. <br><br> <b>Quy trình thực hiện:</b><br>1. Thăm khám vùng cơ bị bó cứng.<br>2. Ngâm chân thảo dược trị liệu.<br>3. Ấn huyệt chuyên sâu giải tỏa điểm kích hoạt đau.<br>4. Chườm đá nóng núi lửa thư giãn.<br><br>Chúng tôi cam kết mang lại sự nhẹ nhõm ngay lập tức.",
-    "image": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800"
+    "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600",
+    "summary": "Giải pháp giảm đau nhức, thông kinh lạc vùng cổ vai gáy an toàn hiệu quả.",
+    "content": "Phương pháp ấn huyệt y học cổ truyền giúp kích thích các huyệt đạo quan trọng như Phong Trì, Kiên Tỉnh, giúp tăng cường tuần hoàn máu, giải tỏa các cơ bị co cứng do ngồi sai tư thế lâu ngày..."
   },
   {
     "id": 2,
-    "title": "Ưu đãi Tháng 5: Mua 1 Tặng 1",
-    "date": "06/05/2026",
-    "summary": "Tặng ngay 1 suất Massage chân khi sử dụng dịch vụ Body 90 phút.",
-    "content": "Chào đón mùa hè, WEB_MSG tung gói ưu đãi lớn nhất năm. <br><br> Khi quý khách đặt lịch trước thông qua Website hoặc Hotline, quý khách sẽ được lựa chọn 1 trong 2 ưu đãi:<br>- Tặng suất Massage Foot 30 phút.<br>- Giảm trực tiếp 20% trên tổng hóa đơn.<br><br> <i>Lưu ý: Chương trình chỉ áp dụng từ thứ 2 đến thứ 5 hàng tuần.</i>",
-    "image": "https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=800"
-  }, 
-    {
-    "id": 3,
-    "title": "Liệu pháp Ấn huyệt Trị liệu Vai Gáy",
-    "date": "05/05/2026",
-    "summary": "Giải pháp dứt điểm đau mỏi cho dân văn phòng chỉ sau một liệu trình.",
-    "content": "Tại WEB_MSG, chúng tôi hiểu rằng đau mỏi vai gáy là nỗi lo của rất nhiều người. <br><br> <b>Quy trình thực hiện:</b><br>1. Thăm khám vùng cơ bị bó cứng.<br>2. Ngâm chân thảo dược trị liệu.<br>3. Ấn huyệt chuyên sâu giải tỏa điểm kích hoạt đau.<br>4. Chườm đá nóng núi lửa thư giãn.<br><br>Chúng tôi cam kết mang lại sự nhẹ nhõm ngay lập tức.",
-    "image": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800"
-  },
-  {
-    "id": 4,
-    "title": "Ưu đãi Tháng 5: Mua 1 Tặng 1",
-    "date": "06/05/2026",
-    "summary": "Tặng ngay 1 suất Massage chân khi sử dụng dịch vụ Body 90 phút.",
-    "content": "Chào đón mùa hè, WEB_MSG tung gói ưu đãi lớn nhất năm. <br><br> Khi quý khách đặt lịch trước thông qua Website hoặc Hotline, quý khách sẽ được lựa chọn 1 trong 2 ưu đãi:<br>- Tặng suất Massage Foot 30 phút.<br>- Giảm trực tiếp 20% trên tổng hóa đơn.<br><br> <i>Lưu ý: Chương trình chỉ áp dụng từ thứ 2 đến thứ 5 hàng tuần.</i>",
-    "image": "https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=800"
+    "title": "Massage Thảo dược Toàn thân",
+    "date": "04/05/2026",
+    "image": "https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=600",
+    "summary": "Kết hợp tinh hoa thảo dược tự nhiên mang lại cảm giác thư giãn sâu.",
+    "content": "Sự kết hợp giữa hơi ấm từ các túi thảo dược tự nhiên (ngải cứu, sả, gừng) và các động tác miết dài giúp đào thải độc tố qua da, làm dịu hệ thần kinh và cải thiện giấc ngủ vượt trội..."
   }
 ]
