@@ -45,7 +45,7 @@ const News = mongoose.model('News', NewsSchema);
 // API ENDPOINTS - Hệ thống API cung cấp dữ liệu
 // ==========================================
 
-// [SỬA ĐỔI] API lấy danh sách bài viết (Chuyển sang lấy từ MongoDB bằng async/await)
+// 1. API LẤY DANH SÁCH BÀI VIẾT (GET - Dùng cho trang chủ công khai)
 app.get('/api/news', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -59,10 +59,10 @@ app.get('/api/news', async (req, res) => {
 
         const startIndex = (page - 1) * limit;
         
-        // 1. Lấy tổng số lượng bài viết đang có trong Database thật
+        // Lấy tổng số lượng bài viết đang có trong Database thật
         const totalItems = await News.countDocuments();
 
-        // 2. Truy vấn dữ liệu có phân trang, bỏ qua (skip) các bài cũ và giới hạn (limit) số bài lấy ra
+        // Truy vấn dữ liệu có phân trang, bỏ qua (skip) các bài cũ và giới hạn (limit) số bài lấy ra
         const dbNews = await News.find({})
             .sort({ _id: -1 }) // Sắp xếp bài mới đăng lên đầu tiên
             .skip(startIndex)
@@ -81,6 +81,37 @@ app.get('/api/news', async (req, res) => {
         res.status(500).json({ error: "Lỗi hệ thống không thể lấy dữ liệu từ Database." });
     }
 });
+
+// 2. API ĐĂNG BÀI VIẾT MỚI (POST - Dùng cho trang Admin quản trị)
+app.post('/api/news', async (req, res) => {
+    try {
+        // Gom các dữ liệu người dùng gõ từ giao diện gửi lên
+        const { title, summary, content, image } = req.body;
+
+        // Kiểm tra tính hợp lệ: Bắt buộc phải có Tiêu đề, Tóm tắt và Nội dung
+        if (!title || !summary || !content) {
+            return res.status(400).json({ error: "Vui lòng nhập đầy đủ Tiêu đề, Tóm tắt và Nội dung!" });
+        }
+
+        // Tạo ra một thực thể bài viết mới dựa trên khuôn mẫu News Model đã định nghĩa
+        const newPost = new News({
+            title: title.trim(),
+            summary: summary.trim(),
+            content: content.trim(),
+            image: image.trim() || undefined // Nếu không nhập link ảnh, Mongoose sẽ tự động dùng ảnh mặc định
+        });
+
+        // Ra lệnh cho Mongoose lưu trực tiếp bài viết này vào Database MongoDB Atlas
+        const savedPost = await newPost.save();
+
+        // Trả về tín hiệu thành công (Status 201: Created) cho Frontend biết để hiện thông báo xanh
+        res.status(201).json({ message: "Đăng bài viết mới lên cơ sở dữ liệu thành công!", data: savedPost });
+    } catch (error) {
+        console.error("❌ LỖI TRONG QUÁ TRÌNH LƯU BÀI VIẾT:", error);
+        res.status(500).json({ error: "Lỗi hệ thống, không thể lưu bài viết vào Database lúc này." });
+    }
+});
+
 
 // Cấu hình dự phòng (Fallback): Mọi đường dẫn không khớp API sẽ tự trả về index.html
 app.get('*', (req, res) => {

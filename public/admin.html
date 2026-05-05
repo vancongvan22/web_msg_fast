@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Đăng Bài Admin - WEB_MSG</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .admin-card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .btn-submit { background-color: #0d6efd; border: none; padding: 12px; border-radius: 8px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card admin-card p-4 p-md-5 bg-white">
+                <h2 class="text-center mb-4 text-primary fw-bold">✍️ ĐĂNG BÀI VIẾT MỚI</h2>
+                <div id="alertMessage" class="d-none alert"></div>
+
+                <form id="adminForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tiêu đề bài viết <span class="text-danger">*</span></label>
+                        <input type="text" id="title" class="form-control" placeholder="Nhập tiêu đề hấp dẫn..." required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Link ảnh minh họa (URL)</label>
+                        <input type="url" id="image" class="form-control" placeholder="https://images.unsplash.com/...">
+                        <div class="form-text text-muted">Để trống hệ thống sẽ tự động lấy ảnh Spa mặc định.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tóm tắt ngắn <span class="text-danger">*</span></label>
+                        <textarea id="summary" class="form-control" rows="2" placeholder="Hiển thị ngắn gọn ở trang danh sách..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nội dung chi tiết <span class="text-danger">*</span></label>
+                        <textarea id="content" class="form-control" rows="6" placeholder="Viết nội dung đầy đủ của bài viết tại đây..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-submit mt-3">🚀 Xuất Bản Bài Viết</button>
+                    <a href="/" class="btn btn-link w-100 text-center mt-2 text-decoration-none text-muted">⬅️ Quay lại Trang chủ</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('adminForm').addEventListener('submit', async (e) => {
+        e.preventDefault(); // Chặn trang web bị tải lại khi bấm nút
+
+        const alertDiv = document.getElementById('alertMessage');
+        
+        // Thu thập toàn bộ dữ liệu người dùng gõ vào form
+        const postData = {
+            title: document.getElementById('title').value.trim(),
+            image: document.getElementById('image').value.trim(),
+            summary: document.getElementById('summary').value.trim(),
+            content: document.getElementById('content').value.trim()
+        };
+
+        try {
+            // Gửi dữ liệu bằng phương thức POST lên API Backend vừa viết
+            const response = await fetch('/api/news', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(postData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // Hiển thị thông báo thành công màu xanh lá
+                alertDiv.className = "alert alert-success";
+                alertDiv.innerText = "🎉 " + result.message;
+                alertDiv.classList.remove('d-none');
+                document.getElementById('adminForm').reset(); // Xóa sạch form để sẵn sàng viết bài tiếp theo
+            } else {
+                // Hiển thị lỗi nếu có
+                alertDiv.className = "alert alert-danger";
+                alertDiv.innerText = "❌ " + (result.error || "Có lỗi xảy ra");
+                alertDiv.classList.remove('d-none');
+            }
+        } catch (error) {
+            alertDiv.className = "alert alert-danger";
+            alertDiv.innerText = "❌ Không thể kết nối tới máy chủ!";
+            alertDiv.classList.remove('d-none');
+        }
+    });
+</script>
+</body>
+</html>
