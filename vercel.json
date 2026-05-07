@@ -1,10 +1,5 @@
 {
   "version": 2,
-  "functions": {
-    "server.js": {
-      "runtime": "@vercel/node"
-    }
-  },
   "rewrites": [
     { "source": "/api/:path*", "destination": "/server.js" },
     { "source": "/admin", "destination": "/public/admin.html" },
