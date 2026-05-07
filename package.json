@@ -1,19 +1,14 @@
 {
   "name": "web_msg_fast",
-  "version": "1.0.0",
-  "description": "Spa News Project with MongoDB",
+  "version": "1.0.1",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
-  "engines": {
-    "node": "20.x"
+    "start": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "mongoose": "^8.3.4"
+    "mongoose": "^8.4.0" 
   }
 }
