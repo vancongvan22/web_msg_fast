@@ -1,34 +1,40 @@
-// server.js
 const express = require('express');
 const path = require('path');
-const cors = require('cors'); // [THÊM] Thư viện giúp Frontend gọi được Backend
+const cors = require('cors');
 const mongoose = require('mongoose');
 
 // Tự động cấu hình đọc file .env
 require('dotenv').config({ silent: true });
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// [QUAN TRỌNG] Cho phép Frontend truy cập API từ mọi nguồn (tránh lỗi CORS)
+// 1. Middlewares
 app.use(cors());
 app.use(express.json());
 
-// Định tuyến nạp toàn bộ thư mục tĩnh Frontend
-app.use(express.static(path.join(__dirname, 'public')));
+// 2. Phục vụ file tĩnh (CSS, JS, Images)
+app.use(express.static(path.join(process.cwd(), 'public')));
 
-// ==========================================
-// CONFIG & CONNECT DATABASE (MONGODB)
-// ==========================================
+// 3. Kết nối MongoDB (Tối ưu kết nối cho Vercel Serverless)
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/web_msg_spa';
 
-mongoose.connect(MONGODB_URI)
-    .then(() => console.log('🍃 KẾT NỐI DATABASE MONGODB THÀNH CÔNG!'))
-    .catch(err => console.error('❌ LỖI KẾT NỐI DATABASE MONGODB:', err));
+// Biến kiểm tra kết nối để tránh kết nối lại nhiều lần
+let isConnected = false;
+const connectDB = async () => {
+    if (isConnected) return;
+    try {
+        await mongoose.connect(MONGODB_URI);
+        isConnected = true;
+        console.log('🍃 MongoDB Connected');
+    } catch (err) {
+        console.error('❌ MongoDB Connection Error:', err);
+    }
+};
 
-// ==========================================
-// DEFINE SCHEMAS & MODELS
-// ==========================================
+// Gọi kết nối ngay khi khởi chạy
+connectDB();
+
+// 4. Định nghĩa Schema & Model
 const NewsSchema = new mongoose.Schema({
     title: { type: String, required: true },
     summary: { type: String, required: true },
@@ -37,86 +43,72 @@ const NewsSchema = new mongoose.Schema({
     date: { type: String, default: () => new Date().toLocaleDateString('vi-VN') }
 });
 
-const News = mongoose.model('News', NewsSchema);
+// Kiểm tra nếu model đã tồn tại thì dùng lại, tránh lỗi OverwriteModelError trên Vercel
+const News = mongoose.models.News || mongoose.model('News', NewsSchema);
 
-// ==========================================
-// API ENDPOINTS
-// ==========================================
+// 5. API ENDPOINTS
 
-// 1. API LẤY DANH SÁCH BÀI VIẾT
+// GET: Lấy danh sách tin tức
 app.get('/api/news', async (req, res) => {
+    await connectDB(); // Đảm bảo luôn có kết nối
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 6;
-        
-        if (limit === 999) {
-            const allNews = await News.find({}).sort({ _id: -1 });
-            return res.json({ data: allNews });
-        }
-
-        const startIndex = (page - 1) * limit;
-        const totalItems = await News.countDocuments();
-        const dbNews = await News.find({})
-            .sort({ _id: -1 })
-            .skip(startIndex)
-            .limit(limit);
-
-        res.json({
-            totalItems: totalItems,
-            totalPages: Math.ceil(totalItems / limit),
-            currentPage: page,
-            data: dbNews
-        });
+        const data = await News.find().sort({ _id: -1 });
+        res.status(200).json({ data });
     } catch (error) {
-        console.error("❌ LỖI API LẤY TIN TỨC:", error);
-        res.status(500).json({ error: "Lỗi hệ thống Database." });
+        res.status(500).json({ error: "Không thể lấy dữ liệu từ Server." });
     }
 });
 
-// 2. API ĐĂNG BÀI VIẾT MỚI
+// POST: Đăng bài mới
 app.post('/api/news', async (req, res) => {
+    await connectDB();
     try {
         const { title, summary, content, image } = req.body;
         if (!title || !summary || !content) {
-            return res.status(400).json({ error: "Vui lòng nhập đầy đủ thông tin!" });
+            return res.status(400).json({ error: "Vui lòng nhập đủ thông tin bắt buộc!" });
         }
-
         const newPost = new News({
             title: title.trim(),
             summary: summary.trim(),
             content: content.trim(),
-            image: image.trim() || undefined
+            image: image ? image.trim() : undefined
         });
-
         const savedPost = await newPost.save();
         res.status(201).json({ message: "Đăng bài thành công!", data: savedPost });
     } catch (error) {
-        res.status(500).json({ error: "Không thể lưu bài viết." });
+        console.error("Lỗi POST API:", error);
+        res.status(500).json({ error: "Lỗi hệ thống, không thể lưu bài viết." });
     }
 });
 
-// 3. API LẤY CHI TIẾT 1 BÀI VIẾT
+// GET: Lấy chi tiết 1 bài
 app.get('/api/news/:id', async (req, res) => {
+    await connectDB();
     try {
         const article = await News.findById(req.params.id);
-        if (!article) return res.status(404).json({ error: "Không tìm thấy bài!" });
-        res.json(article);
+        if (!article) return res.status(404).json({ error: "Bài viết không tồn tại." });
+        res.status(200).json(article);
     } catch (error) {
-        res.status(500).json({ error: "Mã bài viết không hợp lệ." });
+        res.status(500).json({ error: "ID bài viết không hợp lệ." });
     }
 });
 
-// Cấu hình dự phòng (Fallback)
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// 6. ĐIỀU HƯỚNG TRANG (Fallback)
+// Route cho trang admin
+app.get('/admin', (req, res) => {
+    res.sendFile(path.resolve(process.cwd(), 'public', 'admin.html'));
 });
 
-// [BẮT BUỘC CHO VERCEL]
+// Tất cả các route khác trả về index.html
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(process.cwd(), 'public', 'index.html'));
+});
+
+// 7. Xuất bản app cho Vercel
 module.exports = app;
 
-// Khởi chạy khi dùng ở Local
+// Chạy Local
 if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => {
-        console.log(`🚀 SERVER ĐANG CHẠY: http://localhost:${PORT}`);
-    });
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`🚀 Server Local: http://localhost:${PORT}`));
 }

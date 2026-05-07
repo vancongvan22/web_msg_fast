@@ -8,7 +8,9 @@
     <style>
         body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         .admin-card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .btn-submit { background-color: #0d6efd; border: none; padding: 12px; border-radius: 8px; font-weight: 600; }
+        .btn-submit { background-color: #0d6efd; border: none; padding: 12px; border-radius: 8px; font-weight: 600; transition: all 0.3s; }
+        .btn-submit:hover { background-color: #0b5ed7; transform: translateY(-1px); }
+        .btn-submit:disabled { background-color: #6c757d; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -18,7 +20,7 @@
         <div class="col-md-8">
             <div class="card admin-card p-4 p-md-5 bg-white">
                 <h2 class="text-center mb-4 text-primary fw-bold">✍️ ĐĂNG BÀI VIẾT MỚI</h2>
-                <div id="alertMessage" class="d-none alert"></div>
+                <div id="alertMessage" class="alert d-none"></div>
 
                 <form id="adminForm">
                     <div class="mb-3">
@@ -29,20 +31,20 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Link ảnh minh họa (URL)</label>
                         <input type="url" id="image" class="form-control" placeholder="https://images.unsplash.com/...">
-                        <div class="form-text text-muted">Để trống hệ thống sẽ tự động lấy ảnh Spa mặc định.</div>
+                        <div class="form-text text-muted">Nếu trống, hệ thống sẽ dùng ảnh Spa mặc định.</div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Tóm tắt ngắn <span class="text-danger">*</span></label>
-                        <textarea id="summary" class="form-control" rows="2" placeholder="Hiển thị ngắn gọn ở trang danh sách..." required></textarea>
+                        <textarea id="summary" class="form-control" rows="2" placeholder="Hiển thị ngắn gọn ở danh sách tin..." required></textarea>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Nội dung chi tiết <span class="text-danger">*</span></label>
-                        <textarea id="content" class="form-control" rows="6" placeholder="Viết nội dung đầy đủ của bài viết tại đây..." required></textarea>
+                        <textarea id="content" class="form-control" rows="6" placeholder="Nội dung đầy đủ của bài viết..." required></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 btn-submit mt-3">🚀 Xuất Bản Bài Viết</button>
+                    <button type="submit" id="btnSubmit" class="btn btn-primary w-100 btn-submit mt-3">🚀 Xuất Bản Bài Viết</button>
                     <a href="/" class="btn btn-link w-100 text-center mt-2 text-decoration-none text-muted">⬅️ Quay lại Trang chủ</a>
                 </form>
             </div>
@@ -52,20 +54,26 @@
 
 <script>
     document.getElementById('adminForm').addEventListener('submit', async (e) => {
-        e.preventDefault(); // Chặn trang web bị tải lại khi bấm nút
-
+        e.preventDefault();
         const alertDiv = document.getElementById('alertMessage');
+        const btnSubmit = document.getElementById('btnSubmit');
         
-        // Thu thập toàn bộ dữ liệu người dùng gõ vào form
+        // Trạng thái chờ
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = "⏳ Đang xử lý dữ liệu...";
+        alertDiv.classList.add('d-none');
+
+        // Lấy dữ liệu và xử lý giá trị ảnh
+        const imageInput = document.getElementById('image').value.trim();
         const postData = {
             title: document.getElementById('title').value.trim(),
-            image: document.getElementById('image').value.trim(),
             summary: document.getElementById('summary').value.trim(),
-            content: document.getElementById('content').value.trim()
+            content: document.getElementById('content').value.trim(),
+            // Nếu ô input ảnh rỗng, không gửi field image để Server dùng default
+            ...(imageInput && { image: imageInput })
         };
 
         try {
-            // Gửi dữ liệu bằng phương thức POST lên API Backend vừa viết
             const response = await fetch('/api/news', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -74,22 +82,25 @@
 
             const result = await response.json();
 
+            alertDiv.classList.remove('d-none');
             if (response.ok) {
-                // Hiển thị thông báo thành công màu xanh lá
-                alertDiv.className = "alert alert-success";
-                alertDiv.innerText = "🎉 " + result.message;
-                alertDiv.classList.remove('d-none');
-                document.getElementById('adminForm').reset(); // Xóa sạch form để sẵn sàng viết bài tiếp theo
+                alertDiv.className = "alert alert-success border-0 shadow-sm";
+                alertDiv.innerHTML = `<strong>Thành công!</strong> ${result.message || "Bài viết đã được đăng."}`;
+                document.getElementById('adminForm').reset();
+                
+                // Tự động cuộn lên đầu để xem thông báo
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                // Hiển thị lỗi nếu có
-                alertDiv.className = "alert alert-danger";
-                alertDiv.innerText = "❌ " + (result.error || "Có lỗi xảy ra");
-                alertDiv.classList.remove('d-none');
+                alertDiv.className = "alert alert-danger border-0 shadow-sm";
+                alertDiv.innerHTML = `<strong>Lỗi:</strong> ${result.error || "Không thể lưu bài viết."}`;
             }
         } catch (error) {
-            alertDiv.className = "alert alert-danger";
-            alertDiv.innerText = "❌ Không thể kết nối tới máy chủ!";
             alertDiv.classList.remove('d-none');
+            alertDiv.className = "alert alert-danger border-0 shadow-sm";
+            alertDiv.innerHTML = "<strong>Lỗi kết nối!</strong> Không thể gửi dữ liệu tới Server. Hãy kiểm tra lại internet.";
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = "🚀 Xuất Bản Bài Viết";
         }
     });
 </script>
