@@ -2,68 +2,63 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const mongoose = require('mongoose');
-
 require('dotenv').config({ silent: true });
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(process.cwd(), 'public')));
 
-// [SỬA QUAN TRỌNG] Đảm bảo trỏ đúng thư mục public trên Vercel
-const publicPath = path.join(process.cwd(), 'public');
-app.use(express.static(publicPath));
+const MONGODB_URI = process.env.MONGODB_URI;
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/web_msg_spa';
-let isConnected = false;
-
-const connectDB = async () => {
-    if (isConnected) return;
-    try {
-        await mongoose.connect(MONGODB_URI);
-        isConnected = true;
-        console.log('🍃 MongoDB Connected');
-    } catch (err) {
-        console.error('❌ MongoDB Error:', err);
-    }
-};
-
-// --- API ENDPOINTS ---
-app.get('/api/news', async (req, res) => {
-    await connectDB();
-    try {
-        const data = await News.find().sort({ _id: -1 });
-        res.json({ data });
-    } catch (error) {
-        res.status(500).json({ error: "Lỗi lấy dữ liệu" });
-    }
-});
-
-app.post('/api/news', async (req, res) => {
-    await connectDB();
-    try {
-        const { title, summary, content, image } = req.body;
-        if (!title || !summary || !content) return res.status(400).json({ error: "Thiếu thông tin!" });
-        const newPost = new News({ title, summary, content, image });
-        await newPost.save();
-        res.status(201).json({ message: "Đăng thành công!", data: newPost });
-    } catch (error) {
-        res.status(500).json({ error: "Lỗi lưu bài viết" });
-    }
-});
-
+// Model định nghĩa sẵn để dùng chung
 const News = mongoose.models.News || mongoose.model('News', new mongoose.Schema({
-    title: String, summary: String, content: String, image: String,
+    title: String,
+    summary: String,
+    content: String,
+    image: { type: String, default: 'https://images.unsplash.com/photo-1600334129128-685c5582fd35?q=80&w=600' },
     date: { type: String, default: () => new Date().toLocaleDateString('vi-VN') }
 }));
 
-// --- ĐIỀU HƯỚNG TRANG ---
-app.get('/admin', (req, res) => res.sendFile(path.join(publicPath, 'admin.html')));
-app.get('/detail/:id', (req, res) => res.sendFile(path.join(publicPath, 'detail.html')));
-app.get('*', (req, res) => res.sendFile(path.join(publicPath, 'index.html')));
+// Hàm bổ trợ kết nối DB
+const connectDB = async () => {
+    if (mongoose.connection.readyState >= 1) return;
+    return mongoose.connect(MONGODB_URI);
+};
+
+// API POST - Nơi bạn đang bị lỗi
+app.post('/api/news', async (req, res) => {
+    try {
+        await connectDB(); // Ép kết nối trước khi lưu
+        const { title, summary, content, image } = req.body;
+        
+        if (!title || !summary || !content) {
+            return res.status(400).json({ error: "Vui lòng nhập đủ các trường bắt buộc" });
+        }
+
+        const newPost = new News({ title, summary, content, image: image || undefined });
+        await newPost.save();
+        
+        res.status(201).json({ message: "Đăng bài thành công!" });
+    } catch (error) {
+        console.error("Lỗi POST:", error);
+        res.status(500).json({ error: "Lỗi kết nối Database" });
+    }
+});
+
+// API GET
+app.get('/api/news', async (req, res) => {
+    try {
+        await connectDB();
+        const data = await News.find().sort({ _id: -1 });
+        res.json({ data });
+    } catch (error) {
+        res.status(500).json({ error: "Lỗi Server" });
+    }
+});
+
+// Điều hướng file tĩnh
+app.get('/admin', (req, res) => res.sendFile(path.join(process.cwd(), 'public', 'admin.html')));
+app.get('*', (req, res) => res.sendFile(path.join(process.cwd(), 'public', 'index.html')));
 
 module.exports = app;
-
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(3000, () => console.log('🚀 http://localhost:3000'));
-}
