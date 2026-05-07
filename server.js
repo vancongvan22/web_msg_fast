@@ -134,13 +134,15 @@ app.get('/api/news/:id', async (req, res) => {
 
 // Cấu hình dự phòng (Fallback): Mọi đường dẫn không khớp API sẽ tự trả về index.html
 app.get('*', (req, res) => {
+    // Đảm bảo đường dẫn này đúng với cấu trúc thư mục của bạn
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-// Khởi chạy hệ thống máy chủ
-app.listen(PORT, () => {
-    console.log(`==================================================`);
-    console.log(`🚀 SERVER CHẠY THÀNH CÔNG TRÊN PRODUCTION!`);
-    console.log(`🌍 Địa chỉ truy cập tại: http://localhost:${PORT}`);
-    console.log(`==================================================`);
-});
+module.exports = app;
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`==================================================`);
+        console.log(`🚀 SERVER ĐANG CHẠY DƯỚI LOCAL!`);
+        console.log(`🌍 Địa chỉ: http://localhost:${PORT}`);
+        console.log(`==================================================`);
+    });
+}
