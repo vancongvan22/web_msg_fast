@@ -2,12 +2,13 @@
   "version": 2,
   "functions": {
     "server.js": {
-      "runtime": "@vercel/node@20"
+      "runtime": "@vercel/node"
     }
   },
   "rewrites": [
     { "source": "/api/:path*", "destination": "/server.js" },
     { "source": "/admin", "destination": "/public/admin.html" },
+    { "source": "/detail/:id", "destination": "/public/detail.html" },
     { "source": "/(.*)", "destination": "/public/$1" }
   ]
 }

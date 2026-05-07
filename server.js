@@ -52,3 +52,7 @@ app.get('/admin', (req, res) => res.sendFile(path.join(process.cwd(), 'public', 
 app.get('*', (req, res) => res.sendFile(path.join(process.cwd(), 'public', 'index.html')));
 
 module.exports = app;
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`🚀 Server chạy tại: http://localhost:${PORT}`));
+}
