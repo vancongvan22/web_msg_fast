@@ -6,10 +6,12 @@
       "use": "@vercel/node"
     }
   ],
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/server.js" },
-    { "source": "/admin", "destination": "/public/admin.html" },
-    { "source": "/detail/:id", "destination": "/public/detail.html" },
-    { "source": "/(.*)", "destination": "/public/$1" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "server.js" },
+    { "src": "/admin", "dest": "/public/admin.html" },
+    { "src": "/detail/(.*)", "dest": "/public/detail.html" },
+    { "src": "/css/(.*)", "dest": "/public/css/$1" },
+    { "src": "/js/(.*)", "dest": "/public/js/$1" },
+    { "src": "/(.*)", "dest": "/public/index.html" }
   ]
 }
