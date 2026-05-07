@@ -1,7 +1,7 @@
 // server.js
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
+// const fs = require('fs');
 const mongoose = require('mongoose'); // [MỚI] 1. Nạp thư viện Mongoose để làm việc với Database
 
 // Tự động cấu hình đọc file .env nếu có (giúp linh hoạt chọn PORT khi deploy)
